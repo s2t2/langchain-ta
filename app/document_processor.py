@@ -17,6 +17,7 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores.faiss import FAISS
 
 from app.text_splitter import split_text_by_substrings
+from app.colors import CELL_COLORS_MAP
 
 load_dotenv()
 
@@ -49,6 +50,7 @@ def parse_cell_type(page_content):
 #
 #    def cell_type(self):
 #        return parse_cell_type(self.page_content)
+
 
 
 class DocumentProcessor:
@@ -145,10 +147,6 @@ class DocumentProcessor:
         #df.index = df["cell_id"]
         return df
 
-
-
-
-
     # CHUNKS:
 
     @cached_property
@@ -196,7 +194,42 @@ class DocumentProcessor:
             records.append(metadata)
         return DataFrame(records)
 
+    # PLOTTING:
 
+    def plot_cell_lengths(self, fig_show=True, height=500, title_extra=""):
+        title = f"{title_extra}Cell Lengths"
+        #subtitle = f"Text Cells: {len(self.text_cells)} | Code Cells: {len(self.code_cells)}"
+        subtitle = f"Document: {self.filename} | Text Cells: {len(self.text_cells)} | Code Cells: {len(self.code_cells)}"
+
+        title += f"<br><sup>{subtitle}</sup>"
+
+        fig = px.violin(self.cells_df, x="cell_length", facet_row="cell_type",
+                        color="cell_type", color_discrete_map=CELL_COLORS_MAP,
+                        title=title, height=height, points="all", box=True,
+        )
+        #fig.add_annotation(text= (f"Document: {self.filepath}"),
+        #    font=dict(size=10, color="grey"), align="left", showarrow=False,
+        #    x= 0,      xref='paper', xanchor='left',    xshift=-1,
+        #    y= -0.15,  yref='paper', yanchor='bottom',  yshift=-5,
+        #)
+
+        if fig_show:
+            fig.show()
+
+    def plot_chunk_lengths(self, fig_show=True, height=500):
+        title = f"Chunk Lengths ({self.chunk_size} chars max)"
+        #subtitle = f"Text Chunks: {len(self.text_chunks)} | Code Chunks: {len(self.code_chunks)}" + f" | Document: {self.filename}"
+        subtitle=f"Document: {self.filename} | Text Chunks: {len(self.text_chunks)} | Code Chunks: {len(self.code_chunks)}"
+        title += f"<br><sup>{subtitle}</sup>"
+        #subtitle = f"Document: {self.filename}"
+        #title += f"<br><sup>{subtitle}</sup>"
+
+        fig = px.violin(self.chunks_df, x="chunk_length", facet_row="cell_type",
+                        color="cell_type", color_discrete_map=CELL_COLORS_MAP,
+                        title=title, height=height, points="all", box=True,
+        )
+        if fig_show:
+            fig.show()
 
 
     # EMBEDDINGS:
@@ -254,7 +287,7 @@ class DocumentProcessor:
 
 def print_docs(docs, meta=False):
     for doc in docs:
-        print("----")
+        #print("----")
         print(doc.page_content[0:50], "...", doc.page_content[-10:])
         if meta:
             print(doc.metadata)
@@ -282,26 +315,24 @@ if __name__ == "__main__":
     #print(dp.cells)
     print(dp.cells_df.shape)
     print(dp.cells_df.head())
+    print(dp.cells_df.groupby("cell_type")["cell_length"].describe())
 
+    print("---------------")
     print(f"TEXT CELLS ({len(dp.text_cells)}):")
     print_docs(dp.text_cells)
 
+    print("---------------")
     print(f"CODE CELLS ({len(dp.code_cells)}):")
     print_docs(dp.code_cells)
 
-
-    breakpoint()
+    dp.plot_cell_lengths()
 
     print("----------")
     print("CHUNKS:", len(dp.chunks))
-    print_docs(dp.chunks)
+    print(dp.chunks_df.head())
 
-
-
-    #starter_dp.retriever
-
-    # cp.plot_cell_lengths(title_extra="- Homework 4 Starter Notebook")
-    # cp.docs_df.groupby("cell_type")["cell_length"].describe()
-    # cp.plot_chunk_lengths(title_extra="- Homework 4 Starter Notebook")
+    dp.plot_chunk_lengths()
     #starter_dp.chunks_df.drop(columns="source").to_csv("hw_4_cell_chunks.csv")
     #starter_dp.chunks_df.drop(columns="source").head()
+
+    #starter_dp.retriever

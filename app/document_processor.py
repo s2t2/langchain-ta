@@ -28,6 +28,9 @@ CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", default="0")) # 40
 TEXT_CELL_PREFIX = "'markdown' cell: "
 CODE_CELL_PREFIX = "'code' cell: "
 
+#OUTPUT_PREFIX = " with output: "
+
+
 def parse_cell_type(page_content):
 
     # cell type (they are clearly marked at the beginning)
@@ -40,6 +43,13 @@ def parse_cell_type(page_content):
     return cell_type
 
 
+def print_docs(docs, meta=False):
+    for doc in docs:
+        #print("----")
+        print(doc.page_content[0:50], "...", doc.page_content[-10:])
+        if meta:
+            print(doc.metadata)
+
 
 #class Cell(Document):
 #
@@ -50,6 +60,7 @@ def parse_cell_type(page_content):
 #
 #    def cell_type(self):
 #        return parse_cell_type(self.page_content)
+
 
 
 
@@ -90,26 +101,6 @@ class DocumentProcessor:
     def doc(self):
         return self.docs[0]
 
-    #@cached_property
-    #def docs_df(self):
-    #    # consider adding the page contents as well
-    #    #return DataFrame([doc.metadata for doc in self.docs])
-    #    records = []
-    #    for doc in self.docs:
-    #        metadata = doc.metadata
-    #        metadata["page_content"] = doc.page_content
-    #        records.append(metadata)
-    #    return DataFrame(records)
-
-    # SPLITTING:
-    #@property
-    #def splitter(self):
-    #    return CharacterTextSplitter(chunk_size=self.chunk_size, chunk_overlap=self.chunk_overlap, separator="\n")
-    #
-    #@cached_property
-    #def cell_chunks(self): # chunk_overlap=CHUNK_OVERLAP, chunk_size=CHUNK_SIZE
-    #    return self.splitter.split_documents(documents=self.docs)
-
     # CELL SPLITTING (TEXT VS CODE):
 
     @cached_property
@@ -147,7 +138,7 @@ class DocumentProcessor:
         #df.index = df["cell_id"]
         return df
 
-    # CHUNKS:
+    # CHUNKS (TEXT VS CODE):
 
     @cached_property
     def chunks(self):
@@ -196,11 +187,10 @@ class DocumentProcessor:
 
     # PLOTTING:
 
-    def plot_cell_lengths(self, fig_show=True, height=500, title_extra=""):
-        title = f"{title_extra}Cell Lengths"
+    def plot_cell_lengths(self, fig_show=True, height=500):
+        title = f"Cell Lengths"
         #subtitle = f"Text Cells: {len(self.text_cells)} | Code Cells: {len(self.code_cells)}"
         subtitle = f"Document: {self.filename} | Text Cells: {len(self.text_cells)} | Code Cells: {len(self.code_cells)}"
-
         title += f"<br><sup>{subtitle}</sup>"
 
         fig = px.violin(self.cells_df, x="cell_length", facet_row="cell_type",
@@ -241,19 +231,12 @@ class DocumentProcessor:
             print(model)
         return model
 
-    @cached_property
-    def retriever(self):
-        db = FAISS.from_documents(self.chunks, self.embeddings_model)
-        #faiss_index = self.filepath.upper().replace(".IPYNB", "") + "_FAISS_INDEX"
-        #db.save_local(faiss_index)
-        #db = FAISS.load_local(faiss_index, self.embeddings)
-        retriever = db.as_retriever()
-        if self.verbose:
-            print("RETRIEVER:", type(retriever))
-        return retriever
-
     def make_retriever(self, cell_type="TEXT", storage_strategy="chunks"):
         docs_map = {
+            "ALL": {
+                "cells": self.cells,
+                "chunks": self.chunks,
+            },
             "TEXT": {
                 "cells": self.text_cells,
                 "chunks": self.text_chunks,
@@ -264,75 +247,22 @@ class DocumentProcessor:
             }
         }
         docs = docs_map[cell_type][storage_strategy]
-
-        embeddings_model = OpenAIEmbeddings(model="text-embedding-ada-002")
-        print(embeddings_model.model_name)
-
-        db = FAISS.from_documents(docs, embeddings_model)
+        db = FAISS.from_documents(docs, self.embeddings_model)
+        #faiss_index = self.filepath.upper().replace(".IPYNB", "") + "_FAISS_INDEX"
+        #db.save_local(faiss_index)
+        #db = FAISS.load_local(faiss_index, self.embeddings)
         retriever = db.as_retriever()
         print(cell_type, storage_strategy.upper(), "RETRIEVER:", type(retriever))
         return retriever
 
     @cached_property
+    def retriever(self):
+        return self.make_retriever(cell_type="ALL")
+
+    @cached_property
     def code_retriever(self):
-        return self.make_retriever(cell_type="CODE", storage_strategy=self.retrieval_strategy)
+        return self.make_retriever(cell_type="CODE")
 
     @cached_property
     def text_retriever(self):
-        return self.make_retriever(cell_type="TEXT", storage_strategy=self.retrieval_strategy)
-
-
-
-
-
-def print_docs(docs, meta=False):
-    for doc in docs:
-        #print("----")
-        print(doc.page_content[0:50], "...", doc.page_content[-10:])
-        if meta:
-            print(doc.metadata)
-
-
-
-if __name__ == "__main__":
-
-    from app.submissions_manager import SubmissionsManager
-
-    print("---------------")
-    print("SUBMISSIONS...")
-    sm = SubmissionsManager()
-    print(sm.dirpath)
-    print(len(sm.filenames))
-
-    print("---------------")
-    print("STARTER DOC...")
-    starter_filepath = sm.find_filepath(substr="STARTER")
-    dp =  DocumentProcessor(starter_filepath)
-    #starter_doc = dp.doc
-    print("DOC(S):", len(dp.docs))
-
-    print("CELLS:", len(dp.cells))
-    #print(dp.cells)
-    print(dp.cells_df.shape)
-    print(dp.cells_df.head())
-    print(dp.cells_df.groupby("cell_type")["cell_length"].describe())
-
-    print("---------------")
-    print(f"TEXT CELLS ({len(dp.text_cells)}):")
-    print_docs(dp.text_cells)
-
-    print("---------------")
-    print(f"CODE CELLS ({len(dp.code_cells)}):")
-    print_docs(dp.code_cells)
-
-    dp.plot_cell_lengths()
-
-    print("----------")
-    print("CHUNKS:", len(dp.chunks))
-    print(dp.chunks_df.head())
-
-    dp.plot_chunk_lengths()
-    #starter_dp.chunks_df.drop(columns="source").to_csv("hw_4_cell_chunks.csv")
-    #starter_dp.chunks_df.drop(columns="source").head()
-
-    #starter_dp.retriever
+        return self.make_retriever(cell_type="TEXT")

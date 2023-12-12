@@ -34,9 +34,18 @@ class SubmissionsManager:
         return None
 
 
+    #@cached_property
+    #def starter_filepath(self):
+    #    return self.find_filepath("STARTER")
+
+
 if __name__ == "__main__":
 
 
-    mgr = SubmissionsManager()
-    print(mgr.dirpath)
-    print(len(mgr.filenames))
+    sm = SubmissionsManager()
+    print(sm.dirpath)
+    print(len(sm.filenames))
+
+    starter_filepath = sm.find_filepath("STARTER")
+
+    print(starter_filepath)

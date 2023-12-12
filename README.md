@@ -25,3 +25,8 @@ SUBMISSIONS_DIRPATH="/Users/USERNAME/Desktop/GRADING HW 4"
 ```sh
 python -m app.submissions_manager
 ```
+
+
+```sh
+python -m app.document_processor
+```

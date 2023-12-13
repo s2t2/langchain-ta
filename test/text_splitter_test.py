@@ -19,3 +19,10 @@ def test_substring_splitting():
         'Substring B: This is the second part.',
         'Substring A: This is the third part.'
     ]
+
+
+
+
+#def test_output_splitting():
+#    code, output = separate_code_and_output(cell_content)
+#    assert output == "/bin/bash: line 1: nvidia-smi: command not found\n"

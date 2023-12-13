@@ -16,7 +16,7 @@ from langchain.text_splitter import CharacterTextSplitter, PythonCodeTextSplitte
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores.faiss import FAISS
 
-from app.text_splitter import split_text_by_substrings
+from app.text_splitter import split_text_by_substrings, parse_cell_type, TEXT_CELL_PREFIX, CODE_CELL_PREFIX
 from app.colors import CELL_COLORS_MAP
 
 load_dotenv()
@@ -25,30 +25,12 @@ CHUNK_SIZE =  int(os.getenv("CHUNK_SIZE", default="1_000"))
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", default="0")) # 40
 
 
-TEXT_CELL_PREFIX = "'markdown' cell: "
-CODE_CELL_PREFIX = "'code' cell: "
-
-#OUTPUT_PREFIX = " with output: "
-
-
-def parse_cell_type(page_content):
-
-    # cell type (they are clearly marked at the beginning)
-    if TEXT_CELL_PREFIX in page_content:
-        cell_type = "TEXT"
-    elif CODE_CELL_PREFIX in page_content:
-        cell_type = "CODE"
-    else:
-        cell_type = None
-    return cell_type
-
-
-def print_docs(docs, meta=False):
-    for doc in docs:
-        #print("----")
-        print(doc.page_content[0:50], "...", doc.page_content[-10:])
-        if meta:
-            print(doc.metadata)
+#def print_docs(docs, meta=False):
+#    for doc in docs:
+#        #print("----")
+#        print(doc.page_content[0:50], "...", doc.page_content[-10:])
+#        if meta:
+#            print(doc.metadata)
 
 
 #class Cell(Document):

@@ -207,7 +207,7 @@ class DocumentProcessor:
             fig.show()
 
     def plot_chunk_lengths(self, fig_show=True, height=500):
-        title = f"Chunk Lengths ({self.chunk_size} chars max)"
+        title = f"Chunk Lengths ({self.chunk_size} chars max, {self.chunk_overlap} chars overlap)"
         #subtitle = f"Text Chunks: {len(self.text_chunks)} | Code Chunks: {len(self.code_chunks)}" + f" | Document: {self.filename}"
         subtitle=f"Document: {self.filename} | Text Chunks: {len(self.text_chunks)} | Code Chunks: {len(self.code_chunks)}"
         title += f"<br><sup>{subtitle}</sup>"

@@ -1,3 +1,10 @@
+
+# ignore results saved to data dir:
+data/*.csv
+data/*.png
+data/*.html
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

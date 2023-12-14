@@ -3,7 +3,8 @@ filterwarnings("ignore")
 
 from app.prompts import STUDENT_QUERY
 from app.submissions_manager import SubmissionsManager
-from app.document_processor import DocumentProcessor, print_docs
+from app.document_processor import DocumentProcessor
+from app.document_formatting import print_docs
 
 #from pandas import pivot_table
 

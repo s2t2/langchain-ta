@@ -58,11 +58,13 @@ def test_document_processor():
         "'markdown' cell: '['## Commenting on a cell', 'You can comment on a Colaboratory notebook like you would on a Google Document. Comments are attached to cells, and are displayed next to the cell they refer to. If you have **comment-only** permissions, you will see a comment button on the top right of the cell when you hover over it.', '', 'If you have edit or comment permissions you can comment on a cell in one of three ways:', '', '1. Select a cell and click the comment button in the toolbar above the top-right corner of the cell.', '1. Right click a text cell and select **Add a comment** from the context menu.', '3. Use the shortcut **Ctrl+Shift+M** to add a comment to the currently selected cell.', '', 'You can resolve and reply to comments, and you can target comments to specific collaborators by typing *+[email address]* (e.g., `+user@domain.com`). Addressed collaborators will be emailed.', '', 'The Comment button in the top-right corner of the page shows all comments attached to the notebook.']'"
     ]
 
-    assert len(dp.cells_df) == 22
+    assert len(dp.cells_df) == len(dp.cells)
     assert isinstance(dp.cells_df, DataFrame)
-    assert dp.cells_df.columns.tolist() == ['filename', 'cell_id', 'cell_type', 'cell_length', 'page_content']
+    assert sorted(dp.cells_df.columns.tolist()) == ['cell_id', 'cell_length', 'cell_type', 'filename', 'page_content']
 
 
     # CHUNKS
 
-    assert dp.chunks_df.columns.tolist() == ['filename', 'cell_id', 'cell_type', 'cell_length', 'page_content', 'chunk_id', 'chunk_length']
+    assert len(dp.chunks) == 23 # more than the number of cells
+    assert len(dp.chunks_df) == len(dp.chunks)
+    assert sorted(dp.chunks_df.columns.tolist()) == ['cell_id', 'cell_length', 'cell_type', 'chunk_id', 'chunk_length', 'filename', 'page_content']

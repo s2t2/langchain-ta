@@ -19,7 +19,9 @@ from langchain.retrievers.document_compressors import EmbeddingsFilter
 from langchain.retrievers import ContextualCompressionRetriever
 
 from app.colors import CELL_COLORS_MAP
-from app.text_splitter import split_text_by_substrings, parse_cell_type, TEXT_CELL_PREFIX, CODE_CELL_PREFIX
+from app.text_splitter import split_text_by_substrings #parse_cell_type, TEXT_CELL_PREFIX, CODE_CELL_PREFIX
+from app.cell import Cell
+from app.document_formatting import documents_to_df
 
 
 load_dotenv()
@@ -32,41 +34,6 @@ SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", default="0.75"))
 FIG_SHOW = bool(os.getenv("FIG_SHOW", default="true") == "true")
 
 
-# consider moving to another file or something:
-def print_docs(docs, meta=False):
-    for doc in docs:
-        #print("----")
-        print(doc.page_content[0:50], "...", doc.page_content[-25:])
-        if meta:
-            print(doc.metadata)
-
-# consider moving to another file or something:
-def print_rows(rows):
-    for _, row in rows.iterrows():
-        #print("----")
-        print(row["page_content"][0:50], "...", row["page_content"][-25:])
-
-
-
-#class Cell(Document):
-#    #def metadata(self):
-#    #    meta = super().metadata
-#    #    meta["cell_type"] = parse_cell_type(self.page_content)
-#    #    return meta
-#
-#    def cell_type(self):
-#        return parse_cell_type(self.page_content)
-
-#class MyCell(object):
-#    # https://stackoverflow.com/a/14182553
-#    def __init__(self, doc):
-#        self.obj = doc or Document()
-#
-#    def __getattr__(self, attr):
-#        return getattr(self.obj, attr)
-#
-#    def cell_type(self):
-#        return parse_cell_type(self.page_content)
 
 
 class DocumentProcessor:
@@ -112,37 +79,33 @@ class DocumentProcessor:
     @cached_property
     def cells(self):
         cell_docs = []
-        cell_texts = split_text_by_substrings(str(self.doc.page_content), TEXT_CELL_PREFIX, CODE_CELL_PREFIX)
+        cell_texts = split_text_by_substrings(str(self.doc.page_content))
         for i, cell_text in enumerate(cell_texts):
             cell_metadata = { #"filepath": self.filepath,
                 "filename": self.filename,
                 "cell_id": i+1,
-                "cell_type": parse_cell_type(cell_text),
+                #"cell_type": parse_cell_type(cell_text),
                 "cell_length": len(cell_text)
             }
             #chunk.metadata = {**chunk.metadata, **cell_metadata} # dict merge
-            doc = Document(page_content=cell_text, metadata=cell_metadata)
+            #doc = Document(page_content=cell_text, metadata=cell_metadata)
+            doc = Cell(page_content=cell_text, metadata=cell_metadata)
             cell_docs.append(doc)
         return cell_docs
 
     @cached_property
     def text_cells(self):
-        return [cell for cell in self.cells if cell.metadata["cell_type"] == "TEXT"]
+        #return [cell for cell in self.cells if cell.metadata["cell_type"] == "TEXT"]
+        return [cell for cell in self.cells if cell.is_text]
 
     @cached_property
     def code_cells(self):
-        return [cell for cell in self.cells if cell.metadata["cell_type"] == "CODE"]
+        #return [cell for cell in self.cells if cell.metadata["cell_type"] == "CODE"]
+        return [cell for cell in self.cells if cell.is_code]
 
     @cached_property
     def cells_df(self):
-        records = []
-        for cell in self.cells:
-            metadata = cell.metadata
-            metadata["page_content"] = cell.page_content
-            records.append(metadata)
-        df = DataFrame(records)
-        #df.index = df["cell_id"]
-        return df
+        return documents_to_df(self.cells)
 
     def plot_cell_lengths(self, fig_show=FIG_SHOW, height=500):
         title = f"Cell Lengths"
@@ -201,14 +164,7 @@ class DocumentProcessor:
 
     @cached_property
     def chunks_df(self):
-        # consider adding the page contents as well
-        #return DataFrame([chunk.metadata for chunk in self.chunks])
-        records = []
-        for chunk in self.chunks:
-            metadata = chunk.metadata
-            metadata["page_content"] = chunk.page_content
-            records.append(metadata)
-        return DataFrame(records)
+        return documents_to_df(self.chunks)
 
     def plot_chunk_lengths(self, fig_show=FIG_SHOW, height=500):
         title = f"Chunk Lengths ({self.chunk_size} chars max, {self.chunk_overlap} chars overlap)"

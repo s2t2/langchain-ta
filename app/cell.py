@@ -9,22 +9,14 @@ class Cell(Document):
     # https://github.com/langchain-ai/langchain/blob/451c5d1d8c857e61991a586a5ac94190947e2d80/libs/core/langchain_core/documents/base.py#L9
 
     def __init__(self, page_content:str, metadata=None):
-        #super().__init__(page_content=page_content, metadata=metadata, type="Document") # Literal["Document"] =
-
         metadata = metadata or {}
-        super().__init__(page_content=str(page_content), metadata=metadata, type="Document") # =
+        super().__init__(page_content=str(page_content), metadata=metadata, type="Document")
+
         self.metadata["cell_type"] = parse_cell_type(self.page_content)
 
-    #@property
-    #def metadata(self):
-    #    meta = super().metadata
-    #    breakpoint()
-    #    meta["cell_type"] = parse_cell_type(self.page_content)
-    #    return meta
 
     @property
     def cell_type(self):
-        #return self.metadata.get("cell_type")
         return self.metadata["cell_type"]
 
     @property

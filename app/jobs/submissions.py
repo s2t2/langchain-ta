@@ -6,9 +6,10 @@ from pandas import DataFrame, merge
 import plotly.express as px
 
 from app import DATA_DIRPATH
-from app.submissions_manager import SubmissionsManager
-from app.document_processor import DocumentProcessor, print_docs, print_rows
 from app.colors import CELL_COLORS_MAP
+from app.submissions_manager import SubmissionsManager
+from app.document_processor import DocumentProcessor
+from app.document_formatting import print_docs, print_rows
 
 
 EMPTY_CODE_CELL = "'code' cell: '[]'"

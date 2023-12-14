@@ -11,8 +11,7 @@ def test_document_processor():
 
     #notebook_filepath = os.path.join(os.path.dirname(__file__), "documents", "Making_the_Most_of_your_Colab_Subscription.ipynb")
     notebook_filepath = os.path.join(os.path.dirname(__file__), "documents", "Overview_of_Colaboratory_Features.ipynb")
-    dp = DocumentProcessor(notebook_filepath)
-    cells = dp.cells
+    dp = DocumentProcessor(notebook_filepath, file_id="COLAB_FEATURES")
 
     assert len(dp.docs) == 1
     assert dp.doc == dp.docs[0]
@@ -24,14 +23,17 @@ def test_document_processor():
     assert len(dp.text_cells) == 18
     assert len(dp.code_cells) == 4
 
-    assert isinstance(dp.cells[0], Document)
-    assert dp.cells[0].metadata == {
+    cell = dp.cells[0]
+    assert isinstance(cell, Document)
+    assert cell.metadata == {
         'filename': 'Overview_of_Colaboratory_Features.ipynb',
+        'file_id': "COLAB_FEATURES",
         'cell_id': 1,
         'cell_type': 'TEXT',
-        'cell_length': 164
+        'cell_length': 164,
+        'is_empty': False
     }
-    assert dp.cells[0].page_content == "'markdown' cell: '['# Cells', 'A notebook is a list of cells. Cells contain either explanatory text or executable code and its output. Click a cell to select it.']'"
+    assert cell.page_content == "'markdown' cell: '['# Cells', 'A notebook is a list of cells. Cells contain either explanatory text or executable code and its output. Click a cell to select it.']'"
 
     assert [cell.page_content for cell in dp.cells] == [
         "'markdown' cell: '['# Cells', 'A notebook is a list of cells. Cells contain either explanatory text or executable code and its output. Click a cell to select it.']'",
@@ -58,11 +60,13 @@ def test_document_processor():
         "'markdown' cell: '['## Commenting on a cell', 'You can comment on a Colaboratory notebook like you would on a Google Document. Comments are attached to cells, and are displayed next to the cell they refer to. If you have **comment-only** permissions, you will see a comment button on the top right of the cell when you hover over it.', '', 'If you have edit or comment permissions you can comment on a cell in one of three ways:', '', '1. Select a cell and click the comment button in the toolbar above the top-right corner of the cell.', '1. Right click a text cell and select **Add a comment** from the context menu.', '3. Use the shortcut **Ctrl+Shift+M** to add a comment to the currently selected cell.', '', 'You can resolve and reply to comments, and you can target comments to specific collaborators by typing *+[email address]* (e.g., `+user@domain.com`). Addressed collaborators will be emailed.', '', 'The Comment button in the top-right corner of the page shows all comments attached to the notebook.']'"
     ]
 
-    assert len(dp.cells_df) == 22
+    assert len(dp.cells_df) == len(dp.cells)
     assert isinstance(dp.cells_df, DataFrame)
-    assert dp.cells_df.columns.tolist() == ['filename', 'cell_id', 'cell_type', 'cell_length', 'page_content']
+    assert sorted(dp.cells_df.columns.tolist()) == ['cell_id', 'cell_length', 'cell_type', 'file_id', 'filename', 'is_empty', 'page_content']
 
 
     # CHUNKS
 
-    assert dp.chunks_df.columns.tolist() == ['filename', 'cell_id', 'cell_type', 'cell_length', 'page_content', 'chunk_id', 'chunk_length']
+    assert len(dp.chunks) == 23 # more than the number of cells
+    assert len(dp.chunks_df) == len(dp.chunks)
+    assert sorted(dp.chunks_df.columns.tolist()) == ['cell_id', 'cell_length', 'cell_type', 'chunk_id', 'chunk_length', 'file_id', 'filename', 'is_empty','page_content']

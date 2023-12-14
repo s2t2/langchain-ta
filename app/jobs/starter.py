@@ -1,18 +1,13 @@
 from warnings import filterwarnings
 filterwarnings("ignore")
 
-from app import DATA_DIRPATH
+from app.prompts import STUDENT_QUERY
 from app.submissions_manager import SubmissionsManager
-from app.document_processor import DocumentProcessor #, print_docs
+from app.document_processor import DocumentProcessor, print_docs
 
-from pandas import pivot_table
+#from pandas import pivot_table
 
-def print_docs(docs, meta=False):
-    for doc in docs:
-        #print("----")
-        print(doc.page_content[0:50], "...", doc.page_content[-25:])
-        if meta:
-            print(doc.metadata)
+
 
 def print_relevant_cells(cells):
     total_length = 0
@@ -65,7 +60,6 @@ if __name__ == "__main__":
     if keep_going != "Y":
         exit()
 
-    STUDENT_QUERY = "What is the student's name? What is their GW ID?"
     print("QUERY:", STUDENT_QUERY)
 
     relevant_docs = dp.text_retriever.get_relevant_documents(STUDENT_QUERY)

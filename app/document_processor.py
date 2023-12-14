@@ -32,6 +32,22 @@ SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", default="0.75"))
 FIG_SHOW = bool(os.getenv("FIG_SHOW", default="true") == "true")
 
 
+# consider moving to another file or something:
+def print_docs(docs, meta=False):
+    for doc in docs:
+        #print("----")
+        print(doc.page_content[0:50], "...", doc.page_content[-25:])
+        if meta:
+            print(doc.metadata)
+
+# consider moving to another file or something:
+def print_rows(rows):
+    for _, row in rows.iterrows():
+        #print("----")
+        print(row["page_content"][0:50], "...", row["page_content"][-25:])
+
+
+
 #class Cell(Document):
 #    #def metadata(self):
 #    #    meta = super().metadata

@@ -71,23 +71,21 @@ python -m app.submissions_manager
 Process the starter file:
 
 ```sh
-python -m app.jobs.starter
+python -m app.starter_doc_processor
 
-# FIG_SHOW=false python -m app.jobs.starter
+# FIG_SHOW=false python -m app.starter_doc_processor
 
-# FIG_SHOW=false CHUNK_SIZE=600 CHUNK_OVERLAP=0 python -m app.jobs.starter
+# FIG_SHOW=false CHUNK_SIZE=600 CHUNK_OVERLAP=0 python -m app.starter_doc_processor
 
-# FIG_SHOW=false CHUNK_SIZE=600 CHUNK_OVERLAP=0 SIMILARITY_THRESHOLD=0.75 python -m app.jobs.starter
+# FIG_SHOW=false CHUNK_SIZE=600 CHUNK_OVERLAP=0 SIMILARITY_THRESHOLD=0.75 python -m app.starter_doc_processor
 ```
 
 Process all submission files:
 
 ```sh
-python -m app.jobs.submissions
+python -m app.submissions_processor
 
-#FIG_SHOW=false CHUNK_SIZE=600 CHUNK_OVERLAP=0 python -m app.jobs.submissions
-
-# FIG_SHOW=false CHUNK_SIZE=600 CHUNK_OVERLAP=0 SIMILARITY_THRESHOLD=0.75 python -m app.jobs.submissions
+#FIG_SHOW=false CHUNK_SIZE=600 CHUNK_OVERLAP=0 python -m app.submissions_processor
 ```
 
 ## Testing

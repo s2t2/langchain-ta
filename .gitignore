@@ -1,8 +1,12 @@
 
-# ignore results saved to data dir:
-data/*.csv
-data/*.png
-data/*.html
+# ignore artifacts saved to results dir:
+results/*.csv
+results/*.png
+results/*.html
+
+#test/results/*
+
+
 
 
 # Byte-compiled / optimized / DLL files

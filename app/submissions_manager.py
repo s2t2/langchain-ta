@@ -15,9 +15,10 @@ SUBMISSIONS_DIRPATH = os.getenv("SUBMISSIONS_DIRPATH")
 
 class SubmissionsManager:
 
-    def __init__(self, dirpath=SUBMISSIONS_DIRPATH, file_ext=".IPYNB"):
+    def __init__(self, dirpath=SUBMISSIONS_DIRPATH, file_ext=".IPYNB", starter_filename=None):
         self.dirpath = dirpath
         self.file_ext = file_ext
+        self.starter_filename = starter_filename
 
     @cached_property
     def filenames(self):
@@ -34,9 +35,12 @@ class SubmissionsManager:
         return None
 
 
-    #@cached_property
-    #def starter_filepath(self):
-    #    return self.find_filepath("STARTER")
+    @cached_property
+    def starter_filepath(self):
+        if self.starter_filename:
+            return os.path.join(self.dirpath, self.starter_filename)
+        else:
+            return self.find_filepath("STARTER")
 
 
 
@@ -44,9 +48,6 @@ if __name__ == "__main__":
 
 
     sm = SubmissionsManager()
-    print(sm.dirpath)
-    print(len(sm.filenames))
-
-    starter_filepath = sm.find_filepath("STARTER")
-
-    print(starter_filepath)
+    print("SUBMISSIONS DIRPATH:", sm.dirpath)
+    print("FILES:", len(sm.filenames))
+    print("STARTER DOC:", sm.starter_filepath)

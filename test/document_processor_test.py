@@ -30,7 +30,8 @@ def test_document_processor():
         'file_id': "COLAB_FEATURES",
         'cell_id': 1,
         'cell_type': 'TEXT',
-        'cell_length': 164
+        'cell_length': 164,
+        'is_empty': False
     }
     assert cell.page_content == "'markdown' cell: '['# Cells', 'A notebook is a list of cells. Cells contain either explanatory text or executable code and its output. Click a cell to select it.']'"
 
@@ -61,11 +62,11 @@ def test_document_processor():
 
     assert len(dp.cells_df) == len(dp.cells)
     assert isinstance(dp.cells_df, DataFrame)
-    assert sorted(dp.cells_df.columns.tolist()) == ['cell_id', 'cell_length', 'cell_type', 'file_id', 'filename', 'page_content']
+    assert sorted(dp.cells_df.columns.tolist()) == ['cell_id', 'cell_length', 'cell_type', 'file_id', 'filename', 'is_empty', 'page_content']
 
 
     # CHUNKS
 
     assert len(dp.chunks) == 23 # more than the number of cells
     assert len(dp.chunks_df) == len(dp.chunks)
-    assert sorted(dp.chunks_df.columns.tolist()) == ['cell_id', 'cell_length', 'cell_type', 'chunk_id', 'chunk_length', 'file_id', 'filename', 'page_content']
+    assert sorted(dp.chunks_df.columns.tolist()) == ['cell_id', 'cell_length', 'cell_type', 'chunk_id', 'chunk_length', 'file_id', 'filename', 'is_empty','page_content']

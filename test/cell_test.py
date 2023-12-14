@@ -12,15 +12,15 @@ def test_cell_type():
     # metadata and cell type:
 
     cell = Cell(page_content=code_cell_content)
-    assert cell.metadata == {"cell_type":"CODE"}
+    assert cell.metadata == {"cell_type":"CODE", "is_empty": False}
     assert cell.cell_type == "CODE"
 
     cell = Cell(page_content=code_cell_content, metadata={"number": 99})
-    assert cell.metadata == {"number": 99, "cell_type":"CODE"}
+    assert cell.metadata == {"number": 99, "cell_type":"CODE", "is_empty": False}
     assert cell.cell_type == "CODE"
 
     cell = Cell(page_content=text_cell_content, metadata={"number": 99})
-    assert cell.metadata == {"number": 99, "cell_type":"TEXT"}
+    assert cell.metadata == {"number": 99, "cell_type":"TEXT", "is_empty": False}
     assert cell.cell_type == "TEXT"
 
     # empty:

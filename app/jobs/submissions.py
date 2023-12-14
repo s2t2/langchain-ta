@@ -60,7 +60,7 @@ if __name__ == "__main__":
     notebooks_df = DataFrame(records)
     #notebooks_df.index = notebooks_df["filename"]
     #notebooks_df["file_id"] = notebooks_df["filename"].apply(lambda filename: filename.split("_")[1]) # todo: regex instead, to be more precise
-    print("WRITING NOTEBOOKS TO CSV...")
+    #print("WRITING NOTEBOOKS TO CSV...")
     notebooks_df.to_csv(os.path.join(DATA_DIRPATH, "notebooks.csv"), index=False)
     #notebooks_df.head()
 
@@ -92,26 +92,28 @@ if __name__ == "__main__":
     #print("NON-DUPLICATE NON-STARTER NON-BLANK CELLS:")
     dup_rows = cells_df[ (cells_df["starter_content"] == False) & (cells_df["dup_content"] == True) & (cells_df["is_empty"] == False)].sort_values(by="page_content")
 
-    print("------")
-    print("WRITING CELLS TO CSV...")
+    #print("------")
+    #print("WRITING CELLS TO CSV...")
     #print_rows(dup_rows)
     cells_df.to_csv(os.path.join(DATA_DIRPATH, "cells.csv"), index=False)
 
 
+    print("------")
+    print("PLOTTING...")
 
     # PLOTTING: ORIGINAL DOCUMENTS
 
     chart_df = notebooks_df.copy()
     #chart_df["filename"] = chart_df.index
     avg_length = chart_df.groupby('filename')['length'].mean().mean()
-    title = "Document Lengths"
+    title = "Document Lengths (All Content)"
     title += f"<br><sup>Documents: {len(chart_df)} | Avg Length: {avg_length:,.0f} chars</sup>"
     fig = px.violin(chart_df, x="length", box=True, points="all", height=400, title=title,
             hover_data=["file_id", "filename"] # "file_id",
     )
     fig.show()
 
-    # PLOTTING: UNIQUE CONTENT ONLY
+    # PLOTTING: DOCUMENTS (UNIQUE CONTENT ONLY)
 
     chart_df = cells_df.copy()
     chart_df = chart_df[chart_df["dup_content"] == False]
@@ -131,6 +133,35 @@ if __name__ == "__main__":
     )
     fig.show()
 
+    # PLOTTING: CELLS (ALL)
+
+    chart_df = cells_df.copy()
+    chart_df = chart_df[chart_df["cell_length"] <= 10_000] # filter out two outliers 25K, 30K
+    avg_length = chart_df["cell_length"].mean()
+    title = "Cell Lengths (All Content)"
+    title += f"<br><sup>Cells: {len(chart_df)} | Avg Length: {avg_length:,.0f} chars</sup>"
+    fig = px.violin(chart_df, x="cell_length", box=True, points="all", height=500, title=title,
+            hover_data=["page_content"], facet_row="cell_type",
+            color="cell_type", color_discrete_map=CELL_COLORS_MAP
+    )
+    fig.show()
+
+    # PLOTTING: CELLS (UNIQUE)
+
+    chart_df = cells_df.copy()
+    chart_df = chart_df[chart_df["cell_length"] <= 10_000] # filter out two outliers 25K, 30K
+    chart_df = chart_df[chart_df["dup_content"] == False]
+    chart_df = chart_df[chart_df["starter_content"] == False]
+    chart_df = chart_df[chart_df["is_empty"] == False]
+    avg_length = chart_df["cell_length"].mean()
+    title = "Cell Lengths (Unique Content Only)"
+    title += f"<br><sup>Cells: {len(chart_df)} | Avg Length: {avg_length:,.0f} chars</sup>"
+    fig = px.violin(chart_df, x="cell_length", box=True, points="all", height=500, title=title,
+            hover_data=["page_content"], facet_row="cell_type",
+            color="cell_type", color_discrete_map=CELL_COLORS_MAP
+    )
+    fig.show()
+
 
     #print("NON-STARTER DUP CELLS:")
     #nonstarter_dups = cells_df[ (cells_df["dup_content"] == True) & (cells_df["starter_content"] == False) ]
@@ -145,16 +176,6 @@ if __name__ == "__main__":
     #all_cells_df.head()
 
 
-    #chart_df = cells_df.copy()
-    #chart_df = chart_df[chart_df["cell_length"] <= 10_000] # filter out two outliers 25K, 30K
-    #fig = px.violin(chart_df, x="cell_length", box=True, points="all", height=500,
-    #        title="Cell Lengths (All Submissions)",
-    #        hover_data=["page_content"], facet_row="cell_type",
-    #        color="cell_type", color_discrete_map=CELL_COLORS_MAP
-    #)
-    #fig.show()
-
-
     # cells_df[cells_df["page_content"].str.contains("  with output: ") ]
 
     # NON-STARTER CELLS:
@@ -164,20 +185,6 @@ if __name__ == "__main__":
     #chart_df = chart_df[chart_df["starter_content"] == False]
     #fig = px.violin(chart_df, x="cell_length", box=True, points="all", height=500,
     #        title="Non-Starter Cell Lengths (All Submissions)",
-    #        hover_data=["page_content"], facet_row="cell_type",
-    #        color="cell_type", color_discrete_map=CELL_COLORS_MAP
-    #)
-    #fig.show()
-
-    # UNIQUE CELLS
-
-    #cells_df.groupby(["cell_type", "dup_content"])["cell_length"].describe()
-
-    #chart_df = cells_df.copy()
-    #chart_df = chart_df[chart_df["cell_length"] <= 10_000] # filter out two outliers 25K, 30K
-    #chart_df = chart_df[chart_df["dup_content"] == False]
-    #fig = px.violin(chart_df, x="cell_length", box=True, points="all", height=500,
-    #        title="Unique Cell Lengths (All Submissions)",
     #        hover_data=["page_content"], facet_row="cell_type",
     #        color="cell_type", color_discrete_map=CELL_COLORS_MAP
     #)

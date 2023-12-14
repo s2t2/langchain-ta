@@ -11,8 +11,7 @@ def test_document_processor():
 
     #notebook_filepath = os.path.join(os.path.dirname(__file__), "documents", "Making_the_Most_of_your_Colab_Subscription.ipynb")
     notebook_filepath = os.path.join(os.path.dirname(__file__), "documents", "Overview_of_Colaboratory_Features.ipynb")
-    dp = DocumentProcessor(notebook_filepath)
-    cells = dp.cells
+    dp = DocumentProcessor(notebook_filepath, file_id="COLAB_FEATURES")
 
     assert len(dp.docs) == 1
     assert dp.doc == dp.docs[0]
@@ -24,14 +23,16 @@ def test_document_processor():
     assert len(dp.text_cells) == 18
     assert len(dp.code_cells) == 4
 
-    assert isinstance(dp.cells[0], Document)
-    assert dp.cells[0].metadata == {
+    cell = dp.cells[0]
+    assert isinstance(cell, Document)
+    assert cell.metadata == {
         'filename': 'Overview_of_Colaboratory_Features.ipynb',
+        'file_id': "COLAB_FEATURES",
         'cell_id': 1,
         'cell_type': 'TEXT',
         'cell_length': 164
     }
-    assert dp.cells[0].page_content == "'markdown' cell: '['# Cells', 'A notebook is a list of cells. Cells contain either explanatory text or executable code and its output. Click a cell to select it.']'"
+    assert cell.page_content == "'markdown' cell: '['# Cells', 'A notebook is a list of cells. Cells contain either explanatory text or executable code and its output. Click a cell to select it.']'"
 
     assert [cell.page_content for cell in dp.cells] == [
         "'markdown' cell: '['# Cells', 'A notebook is a list of cells. Cells contain either explanatory text or executable code and its output. Click a cell to select it.']'",
@@ -60,11 +61,11 @@ def test_document_processor():
 
     assert len(dp.cells_df) == len(dp.cells)
     assert isinstance(dp.cells_df, DataFrame)
-    assert sorted(dp.cells_df.columns.tolist()) == ['cell_id', 'cell_length', 'cell_type', 'filename', 'page_content']
+    assert sorted(dp.cells_df.columns.tolist()) == ['cell_id', 'cell_length', 'cell_type', 'file_id', 'filename', 'page_content']
 
 
     # CHUNKS
 
     assert len(dp.chunks) == 23 # more than the number of cells
     assert len(dp.chunks_df) == len(dp.chunks)
-    assert sorted(dp.chunks_df.columns.tolist()) == ['cell_id', 'cell_length', 'cell_type', 'chunk_id', 'chunk_length', 'filename', 'page_content']
+    assert sorted(dp.chunks_df.columns.tolist()) == ['cell_id', 'cell_length', 'cell_type', 'chunk_id', 'chunk_length', 'file_id', 'filename', 'page_content']

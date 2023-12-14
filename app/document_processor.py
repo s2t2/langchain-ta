@@ -39,18 +39,18 @@ FIG_SHOW = bool(os.getenv("FIG_SHOW", default="true") == "true")
 class DocumentProcessor:
     """Processes .IPYNB notebook documents."""
 
-    def __init__(self, filepath, chunk_overlap=CHUNK_OVERLAP, chunk_size=CHUNK_SIZE, verbose=True, similarity_threshold=SIMILARITY_THRESHOLD):
+    def __init__(self, filepath, chunk_overlap=CHUNK_OVERLAP, chunk_size=CHUNK_SIZE, verbose=True, similarity_threshold=SIMILARITY_THRESHOLD, file_id=None):
         """Param : filepath to the notebook document"""
 
         self.filepath = filepath
         self.filename = self.filepath.split("/")[-1] # might not work on windows?
+        self.file_id = file_id or self.filename.split("_")[1] # assumes files are named like "Homework 4_USERNAME_more_stuff.ipynb" ... todo: regex instead, to be more precise
 
         self.chunk_overlap = int(chunk_overlap)
         self.chunk_size = int(chunk_size)
 
         self.embeddings_model_name = "text-embedding-ada-002"
         #self.faiss_index = self.filepath.upper().replace(".IPYNB", "") + "_FAISS_INDEX"
-
         self.similarity_threshold = float(similarity_threshold)
 
         self.verbose = bool(verbose)
@@ -82,6 +82,7 @@ class DocumentProcessor:
         cell_texts = split_text_by_substrings(str(self.doc.page_content))
         for i, cell_text in enumerate(cell_texts):
             cell_metadata = { #"filepath": self.filepath,
+                "file_id": self.file_id,
                 "filename": self.filename,
                 "cell_id": i+1,
                 #"cell_type": parse_cell_type(cell_text),

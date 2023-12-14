@@ -4,7 +4,8 @@ results/*.csv
 results/*.png
 results/*.html
 
-#test/results/*
+# ignore artifacts from testing (we just saved a temporary copy of results there for example purposes)
+test/results/*
 
 
 

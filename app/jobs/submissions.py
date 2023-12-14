@@ -51,18 +51,11 @@ if __name__ == "__main__":
     print("CELLS:", len(all_cells))
 
     notebooks_df = DataFrame(records)
-    notebooks_df.index = notebooks_df["notebook"]
-    notebooks_df.drop(columns=["notebook"], inplace=True)
+    notebooks_df.rename(columns={"notebook":"filename"}, inplace=True)
+    notebooks_df.index = notebooks_df["filename"]
+    notebooks_df["file_id"] = notebooks_df["filename"].apply(lambda filename: filename.split("_")[1]) # todo: regex instead, to be more precise
     notebooks_df.to_csv(os.path.join(DATA_DIRPATH, "notebooks.csv"), index=False)
     #notebooks_df.head()
-
-    chart_df = notebooks_df.copy()
-    chart_df["filename"] = chart_df.index
-    fig = px.violin(chart_df, x="length", box=True, points="all", height=400,
-            title="Document Lengths (All Submissions)",
-            hover_data=["filename"]
-    )
-    #fig.show()
 
     # ALL CELLS
 
@@ -97,11 +90,36 @@ if __name__ == "__main__":
     #    print(row)
     print_rows(dup_rows)
 
+    cells_df["file_id"] = cells_df["filename"].apply(lambda filename: filename.split("_")[1]) # todo: regex instead, to be more precise
     cells_df.to_csv(os.path.join(DATA_DIRPATH, "all_cells.csv"), index=False)
 
 
 
-    # PLOTTING...
+
+
+
+
+    chart_df = notebooks_df.copy()
+    chart_df["filename"] = chart_df.index
+    fig = px.violin(chart_df, x="length", box=True, points="all", height=400,
+            title="Document Lengths (All Submissions)",
+            hover_data=["filename"]
+    )
+    fig.show()
+
+
+    chart_df = cells_df.copy()
+    chart_df = chart_df[chart_df["dup_content"] == False]
+    chart_df = chart_df[chart_df["starter_content"] == False]
+    chart_df = chart_df[chart_df["is_empty"] == False]
+    chart_pivot = chart_df.groupby("filename")["cell_length"].sum()
+    chart_pivot = chart_pivot.to_frame().rename(columns={"cell_length": "length"})
+    chart_pivot["filename"] = chart_pivot.index
+    fig = px.violin(chart_pivot, x="length", box=True, points="all", height=400,
+            title="Document Lengths (All Submissions, Unique Content only)",
+            hover_data=["filename"]
+    )
+    fig.show()
 
     #print("NON-STARTER DUP CELLS:")
     #nonstarter_dups = cells_df[ (cells_df["dup_content"] == True) & (cells_df["starter_content"] == False) ]

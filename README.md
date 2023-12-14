@@ -88,6 +88,13 @@ python -m app.submissions_processor
 #FIG_SHOW=false CHUNK_SIZE=600 CHUNK_OVERLAP=0 python -m app.submissions_processor
 ```
 
+LLM Client:
+
+```sh
+TEMP=0.6 python -m app.openai_llm
+```
+
+
 ## Testing
 
 Run tests:

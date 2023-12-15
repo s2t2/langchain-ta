@@ -111,6 +111,12 @@ Chat with the LLM:
 TEMP=0.6 python -m app.openai_llm
 ```
 
+```sh
+DOCS_LIMIT=5 python -m app.submissions_grader
+
+# DOCS_LIMIT=5 SIMILARITY_THRESHOLD=0.75 CHUNK_SIZE=1000 CHUNK_OVERLAP=0 python -m app.submissions_grader
+```
+
 
 ## Testing
 

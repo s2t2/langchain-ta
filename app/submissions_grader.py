@@ -88,7 +88,7 @@ class SubmissionsGrader(SubmissionsRetriever):
         self.model_name = model_name
         self.llm = create_llm(model_name=self.model_name, temp=self.temp)
 
-        self.scorings_csv_filepath = os.path.join(self.results_dirpath, f"scoring_errors_similarity_{self.similarity_threshold}_chunks_{self.chunk_size}_{self.chunk_overlap}_temp_{self.temp}.csv")
+        self.scorings_csv_filepath = os.path.join(self.results_dirpath, f"scorings_similarity_{self.similarity_threshold}_chunks_{self.chunk_size}_{self.chunk_overlap}_temp_{self.temp}.csv")
         self.scorings_df = DataFrame()
         #self.errors_csv_filepath = os.path.join(self.results_dirpath, f"scoring_errors_similarity_{self.similarity_threshold}_chunks_{self.chunk_size}_{self.chunk_overlap}_temp_{self.temp}.csv")
         #self.errors_df = DataFrame()

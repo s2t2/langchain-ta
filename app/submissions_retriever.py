@@ -66,21 +66,23 @@ class SubmissionsRetriever:
                  #retrieval_strategy="chunks",
                  chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP,
                  homework_questions=HOMEWORK_QUESTIONS,
+                 results_dirpath=RESULTS_DIRPATH
                  ):
 
         self.unique_only = unique_only
         self.similarity_threshold = float(similarity_threshold)
         self.retrieval_strategy = "chunks"
-        self.chunk_size = CHUNK_SIZE
-        self.chunk_overlap = CHUNK_OVERLAP
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
 
         self.homework_questions = homework_questions
 
-        self.docs_limit = DOCS_LIMIT
+        self.docs_limit = docs_limit
         if self.docs_limit:
             self.docs_limit = int(self.docs_limit)
 
-        self.queries_csv_filepath = os.path.join(RESULTS_DIRPATH, f"queries_similarity_{self.similarity_threshold}_chunks_{self.chunk_size}_{self.chunk_overlap}.csv")
+        self.results_dirpath = results_dirpath
+        self.queries_csv_filepath = os.path.join(self.results_dirpath, f"queries_similarity_{self.similarity_threshold}_chunks_{self.chunk_size}_{self.chunk_overlap}.csv")
         self.queries_df = None # DataFrame()
 
 

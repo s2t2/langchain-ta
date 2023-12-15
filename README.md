@@ -92,10 +92,12 @@ python -m app.submissions_processor
 
 ### Document Retrieval
 
-Find relevant content in submission files (uses text embeddings model to find relevant documents):
+Designate the homework questions (hard-coded in "app/prompts" dir for now).
+
+Find the most relevant content from the submissions files for answering each of the homework questions (currently uses lower-cost text embeddings model "text-embedding-ada-002" from OpenAI to find relevant documents):
 
 ```sh
-python -m app.submissions_retriever
+DOCS_LIMIT=5 python -m app.submissions_retriever
 
 # DOCS_LIMIT=5 SIMILARITY_THRESHOLD=0.75 CHUNK_SIZE=1000 CHUNK_OVERLAP=0 python -m app.submissions_retriever
 ```

@@ -68,6 +68,8 @@ Demonstrate ability to access submission files:
 python -m app.submissions_manager
 ```
 
+### Cell-based Document Splitting
+
 Process the starter file:
 
 ```sh
@@ -80,13 +82,35 @@ python -m app.starter_doc_processor
 # FIG_SHOW=false CHUNK_SIZE=600 CHUNK_OVERLAP=0 SIMILARITY_THRESHOLD=0.75 python -m app.starter_doc_processor
 ```
 
-Process all submission files:
+Process all submission files (provides metadata about the file contents, compares against starter):
 
 ```sh
 python -m app.submissions_processor
 
-#FIG_SHOW=false CHUNK_SIZE=600 CHUNK_OVERLAP=0 python -m app.submissions_processor
+#FIG_SHOW=false python -m app.submissions_processor
 ```
+
+### Document Retrieval
+
+Designate the homework questions (hard-coded in "app/prompts" dir for now).
+
+Find the most relevant content from the submissions files for answering each of the homework questions (currently uses lower-cost text embeddings model "text-embedding-ada-002" from OpenAI to find relevant documents):
+
+```sh
+DOCS_LIMIT=5 python -m app.submissions_retriever
+
+# DOCS_LIMIT=5 SIMILARITY_THRESHOLD=0.75 CHUNK_SIZE=1000 CHUNK_OVERLAP=0 python -m app.submissions_retriever
+```
+
+
+### Retreival Augmented Generation (RAG)
+
+Chat with the LLM:
+
+```sh
+TEMP=0.6 python -m app.openai_llm
+```
+
 
 ## Testing
 

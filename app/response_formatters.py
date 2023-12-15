@@ -5,7 +5,7 @@
 from typing import List
 from pydantic import BaseModel, Field
 
-COMMENTS = "The comment to accompany the score. Provides justification for the score. Cites specific content present or absent from the response."
+COMMENTS = "The comment to accompany the score. Provides justification for the score. Cites specific content present or absent from the response, as well as the grader's reasoning for providing the score."
 CONFIDENCE_SCORE = "Confidence level in the score. Values range between 0 (low confidence) and 1 (high confidence)"
 
 ONE_TO_FIVE_SCORE = "The score. Values range from 1 (low) to 5 (high), in increments of 0.25 (where 1 is poor, 3 is decent, 4 is good, 4.5 is great, and 5 is perfect). Indicates the degree to which the response completely, thoroughly, and accurately addresses all the questions."

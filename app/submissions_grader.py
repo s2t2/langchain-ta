@@ -16,7 +16,7 @@ from app.prompts import STUDENT_QUERY
 from app.prompts.homework_4 import HOMEWORK_QUESTIONS
 from app.submissions_retriever import SubmissionsRetriever, UNIQUE_ONLY, DOCS_LIMIT
 from app.openai_llm import create_llm, MODEL_NAME, TEMP
-from app.response_formatters import Student, QuestionScoring
+from app.response_formatters import Student, QuestionScoring, ZERO_TO_ONE_SCORE, COMMENTS, CONFIDENCE_SCORE
 
 
 def get_relevant_docs(retriever, query, verbose=True):
@@ -31,13 +31,12 @@ def get_relevant_docs(retriever, query, verbose=True):
 
 
 
-SYSTEM_INSTRUCTIONS = """You are an experienced machine learning practitioner and instructor. Your goal is to grade a student's machine learning homework assignment. Provide a score (and corresponding comments) to indicate how completely and accurately the student addressed the following question:"""
-
-QA_CONTEXT_TEMPLATE = """Answer the **query**, based on the provided **context**, and format your response according to the **formatting instructions** (avoid using special characters).
-
-**Context**: {context}
+# yes, this is NOT a format string. the langchain prompt template will use the squgglies as placeholders
+QA_CONTEXT_TEMPLATE = """Answer the **query**, based only on the provided **context**, and format your response according to the **formatting instructions** (avoid using special characters).
 
 **Query**: {query}
+
+**Context**: {context}
 
 **Formatting Instructions**: {formatting_instructions}
 """
@@ -66,6 +65,42 @@ def qa_chain(llm, query, compression_retriever, parser_class, verbose=False):
     return parsed_response
 
 
+#QUESTION_SCORING_INSTRUCTIONS = f"""
+#You are a helpful and experienced machine learning practitioner and instructor (i.e. the "grading assistant").
+#Your goal is to accurately grade a student's machine learning homework assignment.
+#You will be provided a question, and your task is to provide a score and corresponding comment,
+#based on some provided context about the student's response.
+#
+#  + What 'score' would you give the response for this question? {ZERO_TO_ONE_SCORE}
+#
+#  + And why (i.e. your 'comments')? {COMMENTS}
+#
+#  + And how sure are you about this score (i.e. your 'confidence'), as a percentage between 0 (low confidence) and 1 (high confidence)? {CONFIDENCE_SCORE}
+#
+#NOTE: It is important to grade accurately and fairly, so if you don't know, we'd rather you provide a low confidence, and a low score, and a comment saying you're not sure.
+#
+#NOTE: If you don't have any context, or if you don't think the context is relevant enough, you can provide a zero.
+#"""
+
+
+QUESTION_SCORING_INSTRUCTIONS = f"""
+You are an experienced machine learning practitioner and instructor.
+Your goal is to accurately grade a student's machine learning homework assignment.
+You will be provided a question that the student was supposed to answer,
+and your task is to grade how well the student answered that question,
+based only on some context provided about the student's response.
+
+  + What 'score' would you give the response for this question? {ZERO_TO_ONE_SCORE} If you don't have any context, or if you don't think the context is relevant enough, you should assign a score of 0.
+
+  + How sure are you about this score (i.e. your 'confidence')? {CONFIDENCE_SCORE}
+
+  + And why (i.e. your 'comments' about the score and/or the confidence)? {COMMENTS}
+
+REMEMBER: It is very important to grade accurately, so it is imperative that you only grade based on the provided context,
+and you will prefer to give low confidence and a corresponding comment if you're not sure or if you don't have the context you need.
+"""
+
+
 class SubmissionsGrader(SubmissionsRetriever):
 
     def __init__(self, unique_only=UNIQUE_ONLY, similarity_threshold=SIMILARITY_THRESHOLD, docs_limit=DOCS_LIMIT,
@@ -86,7 +121,7 @@ class SubmissionsGrader(SubmissionsRetriever):
         # ADDITIONS:
         self.temp = temp
         self.model_name = model_name
-        self.llm = create_llm(model_name=self.model_name, temp=self.temp)
+        #self.llm = create_llm(model_name=self.model_name, temp=self.temp)
 
         self.scorings_csv_filepath = os.path.join(self.results_dirpath, f"scorings_similarity_{self.similarity_threshold}_chunks_{self.chunk_size}_{self.chunk_overlap}_temp_{self.temp}.csv")
         self.scorings_df = DataFrame()
@@ -121,12 +156,15 @@ class SubmissionsGrader(SubmissionsRetriever):
 
             record = {"filename": filename, "file_id": dp.file_id} # flattened structure, one row per submission document
             try:
-                student = qa_chain(llm=self.llm, query=STUDENT_QUERY, compression_retriever=compression_retriever, parser_class=Student)
+                llm = create_llm(model_name=self.model_name, temp=self.temp) # does it matter if we use the same model, or another instance? since they don't have memory?
+                student = qa_chain(llm=llm, query=STUDENT_QUERY, compression_retriever=compression_retriever, parser_class=Student)
                 record = {**record, **{"student_id": student.net_id, "student_name": student.name}}
 
                 i = 1
                 for query_id, query in self.homework_questions:
-                    scoring = qa_chain(llm=self.llm, query=query, compression_retriever=compression_retriever, parser_class=QuestionScoring)
+                    query = f"{QUESTION_SCORING_INSTRUCTIONS} {query}"
+                    llm = create_llm(model_name=self.model_name, temp=self.temp) # does it matter if we use the same model, or another instance? since they don't have memory?
+                    scoring = qa_chain(llm=llm, query=query, compression_retriever=compression_retriever, parser_class=QuestionScoring)
                     record[f"scoring_{i}_question_id"] = scoring.question_id
                     record[f"scoring_{i}_score"] = scoring.score
                     record[f"scoring_{i}_comments"] = scoring.comments
@@ -152,8 +190,6 @@ class SubmissionsGrader(SubmissionsRetriever):
 
         #self.errors_df = DataFrame(errors)
         #self.errors_df.to_csv(self.errors_csv_filepath, index=False)
-
-
 
 
 

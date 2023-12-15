@@ -68,6 +68,8 @@ Demonstrate ability to access submission files:
 python -m app.submissions_manager
 ```
 
+### Cell-based Document Splitting
+
 Process the starter file:
 
 ```sh
@@ -80,13 +82,15 @@ python -m app.starter_doc_processor
 # FIG_SHOW=false CHUNK_SIZE=600 CHUNK_OVERLAP=0 SIMILARITY_THRESHOLD=0.75 python -m app.starter_doc_processor
 ```
 
-Process all submission files (provides metadata about the file contents):
+Process all submission files (provides metadata about the file contents, compares against starter):
 
 ```sh
 python -m app.submissions_processor
 
 #FIG_SHOW=false python -m app.submissions_processor
 ```
+
+### Document Retrieval
 
 Find relevant content in submission files (uses text embeddings model to find relevant documents):
 
@@ -96,6 +100,8 @@ python -m app.submissions_retriever
 # DOCS_LIMIT=5 SIMILARITY_THRESHOLD=0.75 CHUNK_SIZE=1000 CHUNK_OVERLAP=0 python -m app.submissions_retriever
 ```
 
+
+### Retreival Augmented Generation (RAG)
 
 Chat with the LLM:
 

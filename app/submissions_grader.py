@@ -84,17 +84,26 @@ def qa_chain(llm, query, compression_retriever, parser_class, verbose=False):
 
 
 QUESTION_SCORING_INSTRUCTIONS = f"""
-You are an experienced machine learning practitioner and instructor.
+You are an experienced machine learning practitioner and instructor (i.e. the Grader).
 Your goal is to accurately grade a student's machine learning homework assignment.
 You will be provided a question that the student was supposed to answer,
 and your task is to grade how well the student answered that question,
 based only on some context provided about the student's response.
 
-  + What 'score' would you give the response for this question? {ZERO_TO_ONE_SCORE} If you don't have any context, or if you don't think the context is relevant enough, you should assign a score of 0.
+Grading Guidance:
 
-  + How sure are you about this score (i.e. your 'confidence')? {CONFIDENCE_SCORE}
+  + What 'score' would you give the response for this question?
+    If you don't have any context, or if you don't think the context is relevant enough, you should assign a score of 0.
+    If the student's response was off-topic, not specific enough, or not what the question is looking for, you should assign a score of 0.5.
+    If the response was generally good, but there were some minor issue(s), you should assign a score of 0.75.
+    If the response was relevant and correct, you should assign a score of 1.0.
+    If the response was relevant and correct, and very thorough and detailed, you should assign a score of 1.25.
 
-  + And why (i.e. your 'comments' about the score and/or the confidence)? {COMMENTS}
+  + How certain are you about this score (i.e. your 'confidence')?
+
+  + And why (i.e. your 'comments' about the score and/or the confidence)?
+    You should provide specific justification for the score.
+    You should cite specific content present or absent from the response, as well as your reasoning for providing the score.
 
 REMEMBER: It is very important to grade accurately, so it is imperative that you only grade based on the provided context,
 and you will prefer to give low confidence and a corresponding comment if you're not sure or if you don't have the context you need.

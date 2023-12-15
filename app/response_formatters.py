@@ -5,11 +5,12 @@
 from typing import List
 from pydantic import BaseModel, Field
 
-COMMENTS = "The comment to accompany the score. Provides justification for the score. Cites specific content present or absent from the response, as well as the grader's reasoning for providing the score."
-CONFIDENCE_SCORE = "Confidence level in the score. Values range between 0 (low confidence) and 1 (high confidence)"
+COMMENTS = "Comment to accompany the score."
+CONFIDENCE_SCORE = "Confidence level in the score. Values range from 0.0 (low) to 1.0 (high confidence)."
 
-ONE_TO_FIVE_SCORE = "The score. Values range from 1 (low) to 5 (high), in increments of 0.25 (where 1 is poor, 3 is decent, 4 is good, 4.5 is great, and 5 is perfect). Indicates the degree to which the response completely, thoroughly, and accurately addresses all the questions."
-ZERO_TO_ONE_SCORE = "The score. Values range from 0 (low) to 1 (high), in increments of 0.05 (where 0 is unattempted or blank, 0.5 is incorrect or incomplete, 0.75 is good, 0.9 is great, and 1.0 is perfect). Indicates the degree to which the response completely, thoroughly, and accurately addresses the question."
+#ZERO_TO_ONE_SCORE = "The score. Values range from 0 (low) to 1 (high), in increments of 0.25 (where 0 is unattempted or blank, 0.5 is incorrect or incomplete, 0.75 is good, and 1.0 is great / thorough). Indicates the degree to which the response completely, thoroughly, and accurately addresses the question."
+ZERO_TO_ONE_SCORE = "The score. Values generally range from 0.0 (low) to 1.0 (high), although it is possible for score to be greater than 1.0."
+ONE_TO_FIVE_SCORE = "The score. Values generally range from 1.0 (low) to 5.0 (high)."
 
 class Student(BaseModel):
     """A student."""

@@ -4,12 +4,15 @@
 
 
 # ignore artifacts saved to results dir:
+*/*.csv
 results/*.csv
 results/*.png
 results/*.html
 
 # ignore artifacts from testing (we just saved a temporary copy of results there for example purposes)
 test/results/*
+!test/results/cells_example.csv
+!test/results/notebooks_example.csv
 
 
 

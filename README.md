@@ -80,15 +80,24 @@ python -m app.starter_doc_processor
 # FIG_SHOW=false CHUNK_SIZE=600 CHUNK_OVERLAP=0 SIMILARITY_THRESHOLD=0.75 python -m app.starter_doc_processor
 ```
 
-Process all submission files:
+Process all submission files (provides metadata about the file contents):
 
 ```sh
 python -m app.submissions_processor
 
-#FIG_SHOW=false CHUNK_SIZE=600 CHUNK_OVERLAP=0 python -m app.submissions_processor
+#FIG_SHOW=false python -m app.submissions_processor
 ```
 
-LLM Client:
+Find relevant content in submission files (uses text embeddings model to find relevant documents):
+
+```sh
+python -m app.submissions_retriever
+
+# DOCS_LIMIT=5 SIMILARITY_THRESHOLD=0.75 CHUNK_SIZE=1000 CHUNK_OVERLAP=0 python -m app.submissions_retriever
+```
+
+
+Chat with the LLM:
 
 ```sh
 TEMP=0.6 python -m app.openai_llm

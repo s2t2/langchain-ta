@@ -27,7 +27,6 @@ EXPECTED_NOTEBOOK_RECORDS = [
         'text_cells': 18,
         'avg_code_cell_length': 169.0,
         'avg_text_cell_length': 341.1,
-
     }
 ]
 

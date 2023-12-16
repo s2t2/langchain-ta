@@ -30,8 +30,14 @@ def get_relevant_docs(retriever, query, verbose=True):
     return relevant_docs
 
 
+  
+#QA_CONTEXT_TEMPLATE = """Answer the **query**, based on the provided **context**.
+#
+#**Context**: {context}
+#
+#**Query**: {query}
+#"""
 
-# yes, this is NOT a format string. the langchain prompt template will use the squgglies as placeholders
 QA_CONTEXT_TEMPLATE = """Answer the **query**, based only on the provided **context**, and format your response according to the **formatting instructions** (avoid using special characters).
 
 **Query**: {query}
@@ -40,14 +46,6 @@ QA_CONTEXT_TEMPLATE = """Answer the **query**, based only on the provided **cont
 
 **Formatting Instructions**: {formatting_instructions}
 """
-
-#QA_CONTEXT_TEMPLATE = """Answer the **query**, based on the provided **context**.
-#
-#**Context**: {context}
-#
-#**Query**: {query}
-#"""
-
 
 def qa_chain(llm, query, compression_retriever, parser_class, verbose=False):
     # https://www.youtube.com/watch?v=yriZBFKE9JU
@@ -130,7 +128,7 @@ class SubmissionsGrader(SubmissionsRetriever):
         # ADDITIONS:
         self.temp = temp
         self.model_name = model_name
-        #self.llm = create_llm(model_name=self.model_name, temp=self.temp)
+        self.llm = create_llm(model_name=self.model_name, temp=self.temp)
 
         self.scorings_csv_filepath = os.path.join(self.results_dirpath, f"scorings_similarity_{self.similarity_threshold}_chunks_{self.chunk_size}_{self.chunk_overlap}_temp_{self.temp}.csv")
         self.scorings_df = DataFrame()
@@ -165,15 +163,14 @@ class SubmissionsGrader(SubmissionsRetriever):
 
             record = {"filename": filename, "file_id": dp.file_id} # flattened structure, one row per submission document
             try:
-                llm = create_llm(model_name=self.model_name, temp=self.temp) # does it matter if we use the same model, or another instance? since they don't have memory?
-                student = qa_chain(llm=llm, query=STUDENT_QUERY, compression_retriever=compression_retriever, parser_class=Student)
+
+                student = qa_chain(llm=self.llm, query=STUDENT_QUERY, compression_retriever=compression_retriever, parser_class=Student)
                 record = {**record, **{"student_id": student.net_id, "student_name": student.name}}
 
                 i = 1
                 for query_id, query in self.homework_questions:
                     query = f"{QUESTION_SCORING_INSTRUCTIONS} {query}"
-                    llm = create_llm(model_name=self.model_name, temp=self.temp) # does it matter if we use the same model, or another instance? since they don't have memory?
-                    scoring = qa_chain(llm=llm, query=query, compression_retriever=compression_retriever, parser_class=QuestionScoring)
+                    scoring = qa_chain(llm=self.llm, query=query, compression_retriever=compression_retriever, parser_class=QuestionScoring)
                     record[f"scoring_{i}_question_id"] = scoring.question_id
                     record[f"scoring_{i}_score"] = scoring.score
                     record[f"scoring_{i}_comments"] = scoring.comments
@@ -201,10 +198,8 @@ class SubmissionsGrader(SubmissionsRetriever):
         #self.errors_df.to_csv(self.errors_csv_filepath, index=False)
 
 
-
+        
 if __name__ == "__main__":
-
-
 
     grader = SubmissionsGrader()
     grader.perform()

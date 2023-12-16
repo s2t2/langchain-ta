@@ -16,7 +16,7 @@ from app.prompts import STUDENT_QUERY
 from app.prompts.homework_4 import HOMEWORK_QUESTIONS
 from app.submissions_retriever import SubmissionsRetriever, UNIQUE_ONLY, DOCS_LIMIT
 from app.openai_llm import create_llm, MODEL_NAME, TEMP
-from app.response_formatters import Student, QuestionScoring
+from app.response_formatters import Student, QuestionScoring, ZERO_TO_ONE_SCORE, COMMENTS, CONFIDENCE_SCORE
 
 
 def get_relevant_docs(retriever, query, verbose=True):
@@ -30,18 +30,7 @@ def get_relevant_docs(retriever, query, verbose=True):
     return relevant_docs
 
 
-
-SYSTEM_INSTRUCTIONS = """You are an experienced machine learning practitioner and instructor. Your goal is to grade a student's machine learning homework assignment. Provide a score (and corresponding comments) to indicate how completely and accurately the student addressed the following question:"""
-
-QA_CONTEXT_TEMPLATE = """Answer the **query**, based on the provided **context**, and format your response according to the **formatting instructions** (avoid using special characters).
-
-**Context**: {context}
-
-**Query**: {query}
-
-**Formatting Instructions**: {formatting_instructions}
-"""
-
+  
 #QA_CONTEXT_TEMPLATE = """Answer the **query**, based on the provided **context**.
 #
 #**Context**: {context}
@@ -49,6 +38,14 @@ QA_CONTEXT_TEMPLATE = """Answer the **query**, based on the provided **context**
 #**Query**: {query}
 #"""
 
+QA_CONTEXT_TEMPLATE = """Answer the **query**, based only on the provided **context**, and format your response according to the **formatting instructions** (avoid using special characters).
+
+**Query**: {query}
+
+**Context**: {context}
+
+**Formatting Instructions**: {formatting_instructions}
+"""
 
 def qa_chain(llm, query, compression_retriever, parser_class, verbose=False):
     # https://www.youtube.com/watch?v=yriZBFKE9JU
@@ -64,6 +61,51 @@ def qa_chain(llm, query, compression_retriever, parser_class, verbose=False):
     response = chain.invoke({"query": query, "context": relevant_docs, "formatting_instructions": formatting_instructions})
     parsed_response = parser.invoke(response["text"])
     return parsed_response
+
+
+#QUESTION_SCORING_INSTRUCTIONS = f"""
+#You are a helpful and experienced machine learning practitioner and instructor (i.e. the "grading assistant").
+#Your goal is to accurately grade a student's machine learning homework assignment.
+#You will be provided a question, and your task is to provide a score and corresponding comment,
+#based on some provided context about the student's response.
+#
+#  + What 'score' would you give the response for this question? {ZERO_TO_ONE_SCORE}
+#
+#  + And why (i.e. your 'comments')? {COMMENTS}
+#
+#  + And how sure are you about this score (i.e. your 'confidence'), as a percentage between 0 (low confidence) and 1 (high confidence)? {CONFIDENCE_SCORE}
+#
+#NOTE: It is important to grade accurately and fairly, so if you don't know, we'd rather you provide a low confidence, and a low score, and a comment saying you're not sure.
+#
+#NOTE: If you don't have any context, or if you don't think the context is relevant enough, you can provide a zero.
+#"""
+
+
+QUESTION_SCORING_INSTRUCTIONS = f"""
+You are an experienced machine learning practitioner and instructor (i.e. the Grader).
+Your goal is to accurately grade a student's machine learning homework assignment.
+You will be provided a question that the student was supposed to answer,
+and your task is to grade how well the student answered that question,
+based only on some context provided about the student's response.
+
+Grading Guidance:
+
+  + What 'score' would you give the response for this question?
+    If you don't have any context, or if you don't think the context is relevant enough, you should assign a score of 0.
+    If the student's response was off-topic, not specific enough, or not what the question is looking for, you should assign a score of 0.5.
+    If the response was generally good, but there were some minor issue(s), you should assign a score of 0.75.
+    If the response was relevant and correct, you should assign a score of 1.0.
+    If the response was relevant and correct, and very thorough and detailed, you should assign a score of 1.25.
+
+  + How certain are you about this score (i.e. your 'confidence')?
+
+  + And why (i.e. your 'comments' about the score and/or the confidence)?
+    You should provide specific justification for the score.
+    You should cite specific content present or absent from the response, as well as your reasoning for providing the score.
+
+REMEMBER: It is very important to grade accurately, so it is imperative that you only grade based on the provided context,
+and you will prefer to give low confidence and a corresponding comment if you're not sure or if you don't have the context you need.
+"""
 
 
 class SubmissionsGrader(SubmissionsRetriever):
@@ -121,11 +163,13 @@ class SubmissionsGrader(SubmissionsRetriever):
 
             record = {"filename": filename, "file_id": dp.file_id} # flattened structure, one row per submission document
             try:
+
                 student = qa_chain(llm=self.llm, query=STUDENT_QUERY, compression_retriever=compression_retriever, parser_class=Student)
                 record = {**record, **{"student_id": student.net_id, "student_name": student.name}}
 
                 i = 1
                 for query_id, query in self.homework_questions:
+                    query = f"{QUESTION_SCORING_INSTRUCTIONS} {query}"
                     scoring = qa_chain(llm=self.llm, query=query, compression_retriever=compression_retriever, parser_class=QuestionScoring)
                     record[f"scoring_{i}_question_id"] = scoring.question_id
                     record[f"scoring_{i}_score"] = scoring.score
@@ -154,12 +198,8 @@ class SubmissionsGrader(SubmissionsRetriever):
         #self.errors_df.to_csv(self.errors_csv_filepath, index=False)
 
 
-
-
-
+        
 if __name__ == "__main__":
-
-
 
     grader = SubmissionsGrader()
     grader.perform()

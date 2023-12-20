@@ -12,10 +12,11 @@ load_dotenv()
 
 #SUBMISSIONS_DIRPATH = "/content/drive/MyDrive/OpenAI TA Agent/submissions/Homework 4"
 SUBMISSIONS_DIRPATH = os.getenv("SUBMISSIONS_DIRPATH")
+STARTER_FILENAME = os.getenv("STARTER_FILENAME")
 
 class SubmissionsManager:
 
-    def __init__(self, dirpath=SUBMISSIONS_DIRPATH, file_ext=".IPYNB", starter_filename=None):
+    def __init__(self, dirpath=SUBMISSIONS_DIRPATH, file_ext=".IPYNB", starter_filename=STARTER_FILENAME):
         self.dirpath = dirpath
         self.file_ext = file_ext
         self.starter_filename = starter_filename
@@ -39,8 +40,8 @@ class SubmissionsManager:
     def starter_filepath(self):
         if self.starter_filename:
             return os.path.join(self.dirpath, self.starter_filename)
-        else:
-            return self.find_filepath("STARTER")
+        #else:
+        #    return self.find_filepath("STARTER")
 
 
 

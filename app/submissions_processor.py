@@ -7,14 +7,14 @@ import plotly.express as px
 
 from app import RESULTS_DIRPATH
 from app.colors import CELL_COLORS_MAP
-from app.submissions_manager import SubmissionsManager, SUBMISSIONS_DIRPATH
+from app.submissions_manager import SubmissionsManager, SUBMISSIONS_DIRPATH, STARTER_FILENAME
 from app.document_processor import DocumentProcessor, FIG_SHOW
 #from app.document_formatting import print_docs, print_rows
 
 
 class SubmissionsProcessor:
 
-    def __init__(self, dirpath=SUBMISSIONS_DIRPATH, starter_filename=None, results_dirpath=RESULTS_DIRPATH):
+    def __init__(self, dirpath=SUBMISSIONS_DIRPATH, starter_filename=STARTER_FILENAME, results_dirpath=RESULTS_DIRPATH):
         """Can use a starter file, or not."""
 
         self.submissions_dirpath = dirpath

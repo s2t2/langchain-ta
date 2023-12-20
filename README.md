@@ -39,7 +39,7 @@ Setup submission files:
 
 1. Download submission files from the learning management system. It will be a zip file of .IPYNB files.
 2. Unzip, and note the directory (i.e. `SUBMISSIONS_DIRPATH`).
-3. Move a copy of the starter notebook (which contains instructions and some starer code) into the submissions directory, and rename it so it contains "STARTER" somewhere in the file name.
+3. Move a copy of the starter notebook (which contains instructions and some starer code) into the submissions directory, and note the filename (i.e. `STARTER_FILENAME`).
 
 
 ### OpenAI Setup
@@ -57,6 +57,7 @@ Create ".env" file and set environment variables:
 OPENAI_API_KEY="sk-..."
 
 SUBMISSIONS_DIRPATH="/Users/USERNAME/Desktop/GRADING HW 4"
+STARTER_FILENAME="Homework_X_STARTER.ipynb"
 ```
 
 

@@ -42,9 +42,21 @@ Setup submission files:
 3. Move a copy of the starter notebook (which contains instructions and some starer code) into the submissions directory, and note the filename (i.e. `STARTER_FILENAME`).
 
 
-### OpenAI Setup
+### LLM Setup
+
+Choose an LLM provider (OpenAI or Meta Llama). OpenAI might be easier to get started, but costs money. Whereas Meta Llama is free, and for this reason is the recommended LLM provider. Based on your chosen LLM provider, see the corresponding setup instructions below.
+
+#### OpenAI Setup
 
 Obtain an OpenAI API Key (i.e. `OPENAI_API_KEY`).
+
+#### Llama Setup
+
+See: https://huggingface.co/meta-llama/Llama-2-7b-chat-hf
+
+First, visit the [Meta Llama website](https://ai.meta.com/resources/models-and-libraries/llama-downloads/), fill out the request form, and wait until your request is accepted.
+
+Then, create a [Hugging Face account](https://huggingface.co) (using the same email address from step 1), and obtain a [user access token](https://huggingface.co/docs/hub/security-tokens) (i.e. `HUGGING_FACE_TOKEN`).
 
 
 ### Environment Variables Setup
@@ -55,6 +67,8 @@ Create ".env" file and set environment variables:
 # this is the ".env" file...
 
 OPENAI_API_KEY="sk-..."
+# or:
+HUGGINGFACE_TOKEN="..."
 
 SUBMISSIONS_DIRPATH="/Users/USERNAME/Desktop/GRADING HW 4"
 STARTER_FILENAME="Homework_X_STARTER.ipynb"

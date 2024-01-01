@@ -17,7 +17,7 @@ faiss-cpu
 # llama:
 torch # 2.1.0+cu121 (for colab)
 transformers # 4.35.2
-#accelerate # 0.25.0
+accelerate # 0.25.0
 # torchtext # 0.16.0
 
 

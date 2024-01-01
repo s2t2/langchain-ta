@@ -78,11 +78,30 @@ STARTER_FILENAME="Homework_X_STARTER.ipynb"
 
 ## Usage
 
+### Submission Files Manager
+
 Demonstrate ability to access submission files:
 
 ```sh
 python -m app.submissions_manager
 ```
+
+### LLM
+
+Demonstrate ability to query your LLM of choice (OpenAI or Meta Llama).
+
+Query the OpenAI LLM:
+
+```sh
+TEMP=0.6 python -m app.openai.llm
+```
+
+Query the Meta Llama LLM:
+
+```sh
+TEMP=0.6 python -m app.meta.llm
+```
+> NOTE: the first time the LLama model is run, it will take a while to download.
 
 ### Cell-based Document Splitting
 
@@ -121,25 +140,14 @@ DOCS_LIMIT=5 python -m app.submissions_retriever
 
 ### Retreival Augmented Generation (RAG)
 
-#### OpenAI LLM
-
-Chat with the LLM:
+Use an LLM for grading:
 
 ```sh
-TEMP=0.6 python -m app.openai_llm
-```
-
-```sh
-DOCS_LIMIT=5 python -m app.submissions_grader
+DOCS_LIMIT=5 python -m app.openai.submissions_grader
 
 # DOCS_LIMIT=5 SIMILARITY_THRESHOLD=0.75 CHUNK_SIZE=1000 CHUNK_OVERLAP=0 python -m app.submissions_grader
 ```
 
-#### Llama 2 LLM
-
-```sh
-TEMP=0.6 python -m app.meta_llm
-```
 
 ## Testing
 

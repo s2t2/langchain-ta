@@ -11,31 +11,26 @@ from app.llama_prompts import get_prompt, parse_text
 from app.llama_llm import LlamaService
 
 
-load_dotenv()
-
-TEMP = float(os.getenv("TEMP", default="0.0")) # @param {type:"slider", min:0, max:1, step:0.1}
-
-
 if __name__ == "__main__":
 
     service = LlamaService()
-    pipeline = service.pipeline
-    llm = HuggingFacePipeline(pipeline=pipeline, model_kwargs={"temperature":TEMP})
-    print(llm)
+    #pipeline = service.pipeline
+    #llm = HuggingFacePipeline(pipeline=pipeline, model_kwargs={"temperature":TEMP})
+    #print(llm)
 
     # SIMPLE LLM CHAIN
 
-    system_prompt = "You are an advanced assistant that excels at translation. "
-    instruction = "Convert the following text from English to French:\n\n {text}"
-    template = get_prompt(instruction, system_prompt)
-    print(template)
-    prompt = PromptTemplate(template=template, input_variables=["text"])
-
-    llm_chain = LLMChain(prompt=prompt, llm=llm)
-
-    query = "how are you today?"
-    response = llm_chain.run(query)
-    parse_text(response)
+    #system_prompt = "You are an advanced assistant that excels at translation. "
+    #instruction = "Convert the following text from English to French:\n\n {text}"
+    #template = get_prompt(instruction, system_prompt)
+    #print(template)
+    #prompt = PromptTemplate(template=template, input_variables=["text"])
+#
+    #llm_chain = LLMChain(prompt=prompt, llm=llm)
+#
+    #query = "how are you today?"
+    #response = llm_chain.run(query)
+    #parse_text(response)
 
 
     # CHAT CHAIN

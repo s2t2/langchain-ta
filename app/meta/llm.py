@@ -1,8 +1,13 @@
 
 # adapted from youtube video about llama and langchain: ________________
 
+# this is so slow on CPU though...
+# https://stackoverflow.com/a/77022488/670433
+
+
 import os
 from dotenv import load_dotenv
+import textwrap
 
 import torch
 #import transformers
@@ -11,7 +16,7 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import  LLMChain
 from langchain.llms.huggingface_pipeline import HuggingFacePipeline
 
-from app.meta.prompts import get_prompt, parse_text, cut_off_text, remove_substring
+#from app.meta.prompts import get_prompt, parse_text, cut_off_text, remove_substring
 
 load_dotenv()
 
@@ -44,13 +49,20 @@ def compile_prompt(prompt, system_prompt=DEFAULT_SYSTEM_PROMPT, input_variables=
     return PromptTemplate(template=formatted_prompt, input_variables=input_variables)
 
 
+
+
 class HuggingFaceService:
-    def __init__(self, model_name=MODEL_NAME, temp=TEMP, token=HUGGINGFACE_TOKEN): # device_type="cpu",
+    def __init__(self, model_name=MODEL_NAME, temp=TEMP, token=HUGGINGFACE_TOKEN, device_type="cpu"):
         self.model_name = model_name
         self.token = token # hugging face api token
         self.temp = temp
 
-        #self.device_type = device_type # "cpu" for local dev, or "cuda" for colab gpu
+        self.device_type = device_type # "cpu" for local dev, or "cuda" for colab gpu
+
+        # https://stackoverflow.com/a/73530618/670433
+        # https://huggingface.co/openlm-research/open_llama_7b_v2/discussions/2
+        # https://pytorch.org/docs/stable/tensors.html
+        self.torch_dtype = torch.float32 if self.device_type == "cpu" else torch.float16
 
     @property
     def tokenizer(self):
@@ -63,7 +75,8 @@ class HuggingFaceService:
         return AutoModelForCausalLM.from_pretrained(self.model_name, token=self.token,
                                                     device_map="auto",
                                                     #torch_dtype=torch.float16, # GPU ONLY?  https://stackoverflow.com/a/73530618/670433
-                                                    torch_dtype=torch.float32 # CPU
+                                                    #torch_dtype=torch.float32 # CPU
+                                                    torch_dtype=self.torch_dtype
         )
 
     @property
@@ -75,7 +88,8 @@ class HuggingFaceService:
                         max_new_tokens=512, do_sample=True, top_k=30, num_return_sequences=1,
                         eos_token_id=self.tokenizer.eos_token_id,
                         #torch_dtype=torch.bfloat16, # GPU ONLY? https://stackoverflow.com/a/73530618/670433
-                        torch_dtype=torch.float32, # CPU
+                        #torch_dtype=torch.float32, # CPU
+                        torch_dtype=self.torch_dtype
         )
 
     @property
@@ -114,6 +128,12 @@ class HuggingFaceService:
     #
     #    return final_outputs#, outputs
 
+
+
+def parse_text(text):
+    wrapped_text = textwrap.fill(text, width=100)
+    print(wrapped_text +'\n\n')
+    # return assistant_text
 
 
 

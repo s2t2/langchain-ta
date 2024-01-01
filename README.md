@@ -66,10 +66,11 @@ Create ".env" file and set environment variables:
 ```sh
 # this is the ".env" file...
 
+# choose one based on your preferred llm provider:
 OPENAI_API_KEY="sk-..."
-# or:
-HUGGINGFACE_TOKEN="..."
+HUGGINGFACE_TOKEN="hf_..."
 
+# for grading a particular homework:
 SUBMISSIONS_DIRPATH="/Users/USERNAME/Desktop/GRADING HW 4"
 STARTER_FILENAME="Homework_X_STARTER.ipynb"
 ```
@@ -120,6 +121,8 @@ DOCS_LIMIT=5 python -m app.submissions_retriever
 
 ### Retreival Augmented Generation (RAG)
 
+#### OpenAI LLM
+
 Chat with the LLM:
 
 ```sh
@@ -132,6 +135,11 @@ DOCS_LIMIT=5 python -m app.submissions_grader
 # DOCS_LIMIT=5 SIMILARITY_THRESHOLD=0.75 CHUNK_SIZE=1000 CHUNK_OVERLAP=0 python -m app.submissions_grader
 ```
 
+#### Llama 2 LLM
+
+```sh
+TEMP=0.6 python -m app.meta_llm
+```
 
 ## Testing
 

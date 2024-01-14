@@ -8,6 +8,7 @@
 import os
 from dotenv import load_dotenv
 import textwrap
+from random import choice
 
 import torch
 #import transformers
@@ -25,6 +26,9 @@ MODEL_NAME = "meta-llama/Llama-2-7b-chat-hf" # os.getenv("MODEL_NAME", default="
 
 #MAX_NEW_TOKENS = 512
 TEMP = float(os.getenv("TEMP", default="0.0")) # @param {type:"slider", min:0, max:1, step:0.1}
+
+
+
 
 # THIS IS THE OFFICIAL SYSTEM PROMPT?
 INST, INST_END = "[INST]", "[/INST]"
@@ -52,17 +56,16 @@ def compile_prompt(prompt, system_prompt=DEFAULT_SYSTEM_PROMPT, input_variables=
 
 
 class HuggingFaceService:
-    def __init__(self, model_name=MODEL_NAME, temp=TEMP, token=HUGGINGFACE_TOKEN, device_type="cpu"):
+    def __init__(self, model_name=MODEL_NAME, temp=TEMP, token=HUGGINGFACE_TOKEN):
         self.model_name = model_name
         self.token = token # hugging face api token
         self.temp = temp
 
-        self.device_type = device_type # "cpu" for local dev, or "cuda" for colab gpu
-
+        self.device_type = "cuda" if torch.cuda.is_available() else "cpu"
         # https://stackoverflow.com/a/73530618/670433
         # https://huggingface.co/openlm-research/open_llama_7b_v2/discussions/2
         # https://pytorch.org/docs/stable/tensors.html
-        self.torch_dtype = torch.float32 if self.device_type == "cpu" else torch.float16
+        self.torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
 
     @property
     def tokenizer(self):
@@ -72,29 +75,27 @@ class HuggingFaceService:
     @property
     def model(self):
         # https://huggingface.co/docs/transformers/model_doc/auto#transformers.AutoModelForCausalLM
-        return AutoModelForCausalLM.from_pretrained(self.model_name, token=self.token,
-                                                    device_map="auto",
-                                                    #torch_dtype=torch.float16, # GPU ONLY?  https://stackoverflow.com/a/73530618/670433
-                                                    #torch_dtype=torch.float32 # CPU
-                                                    torch_dtype=self.torch_dtype
+        return AutoModelForCausalLM.from_pretrained(
+            self.model_name, token=self.token, device_map="auto", torch_dtype=self.torch_dtype
         )
 
     @property
     def pipeline(self):
         """wrapper for tokenizer and model, for performing the 'text-generation' task"""
         # https://huggingface.co/docs/transformers/main_classes/pipelines
-        return pipeline(task="text-generation", model=self.model, tokenizer=self.tokenizer,
-                        device_map="auto",
-                        max_new_tokens=512, do_sample=True, top_k=30, num_return_sequences=1,
-                        eos_token_id=self.tokenizer.eos_token_id,
-                        #torch_dtype=torch.bfloat16, # GPU ONLY? https://stackoverflow.com/a/73530618/670433
-                        #torch_dtype=torch.float32, # CPU
-                        torch_dtype=self.torch_dtype
+        return pipeline(
+            task="text-generation", model=self.model, tokenizer=self.tokenizer,
+            device_map="auto", torch_dtype=self.torch_dtype, # torch.bfloat16
+            max_new_tokens=512, do_sample=True, top_k=30, num_return_sequences=1,
+            eos_token_id=self.tokenizer.eos_token_id,
         )
 
     @property
     def llm(self):
-        return HuggingFacePipeline(pipeline=self.pipeline, model_kwargs={"temperature":self.temp})
+        return HuggingFacePipeline(
+            #model_id=self.model_name, # this one is getting set to "gpt2" by default?
+            pipeline=self.pipeline, model_kwargs={"temperature":self.temp}
+        )
 
 
     #def predict(self, query):
@@ -150,14 +151,17 @@ if __name__ == "__main__":
         "Tell us about the first humans who landed on the moon."
     ]
 
-    for query in general_knowlege_queries:
-        # response = llm.predict(query).strip()
-        prompt = compile_prompt(prompt=query)
-        llm_chain = LLMChain(prompt=prompt, llm=llm)
-        #response = llm_chain.run(query) # chain({'foo': 1, 'bar': 2})
-        #> ValueError: A single string input was passed in, but this chain expects multiple inputs (set()). When a chain expects multiple inputs, please call it by passing in a dictionary, eg `chain({'foo': 1, 'bar': 2})`
-        response = llm_chain({"query": query}) # ooh it's slow?
-        parse_text(response)
+    query = input("Please provide a Query (or press enter): ")
+    query = query or choice(general_knowlege_queries)
+    print(query)
+
+    # response = llm.predict(query).strip()
+    prompt = compile_prompt(prompt=query)
+    llm_chain = LLMChain(prompt=prompt, llm=llm)
+    #response = llm_chain.run(query) # chain({'foo': 1, 'bar': 2})
+    #> ValueError: A single string input was passed in, but this chain expects multiple inputs (set()). When a chain expects multiple inputs, please call it by passing in a dictionary, eg `chain({'foo': 1, 'bar': 2})`
+    response = llm_chain({"query": query}) # ooh it's slow?
+    parse_text(response)
 
 
     breakpoint()

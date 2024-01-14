@@ -42,9 +42,21 @@ Setup submission files:
 3. Move a copy of the starter notebook (which contains instructions and some starer code) into the submissions directory, and note the filename (i.e. `STARTER_FILENAME`).
 
 
-### OpenAI Setup
+### LLM Setup
+
+Choose an LLM provider (OpenAI or Meta Llama). OpenAI might be easier to get started, but costs money. Whereas Meta Llama is free, and for this reason is the recommended LLM provider. Based on your chosen LLM provider, see the corresponding setup instructions below.
+
+#### OpenAI Setup
 
 Obtain an OpenAI API Key (i.e. `OPENAI_API_KEY`).
+
+#### Llama Setup
+
+See: https://huggingface.co/meta-llama/Llama-2-7b-chat-hf
+
+First, visit the [Meta Llama website](https://ai.meta.com/resources/models-and-libraries/llama-downloads/), fill out the request form, and wait until your request is accepted.
+
+Then, create a [Hugging Face account](https://huggingface.co) (using the same email address from step 1), and obtain a [user access token](https://huggingface.co/docs/hub/security-tokens) (i.e. `HUGGING_FACE_TOKEN`).
 
 
 ### Environment Variables Setup
@@ -54,8 +66,11 @@ Create ".env" file and set environment variables:
 ```sh
 # this is the ".env" file...
 
+# choose one based on your preferred llm provider:
 OPENAI_API_KEY="sk-..."
+HUGGINGFACE_TOKEN="hf_..."
 
+# for grading a particular homework:
 SUBMISSIONS_DIRPATH="/Users/USERNAME/Desktop/GRADING HW 4"
 STARTER_FILENAME="Homework_X_STARTER.ipynb"
 FILE_ID_SPLIT_INDEX="0" # 0 for files from Canvas, 1 for files from Blackboard
@@ -64,11 +79,30 @@ FILE_ID_SPLIT_INDEX="0" # 0 for files from Canvas, 1 for files from Blackboard
 
 ## Usage
 
+### Submission Files Manager
+
 Demonstrate ability to access submission files:
 
 ```sh
 python -m app.submissions_manager
 ```
+
+### LLM
+
+Demonstrate ability to query your LLM of choice (OpenAI or Meta Llama).
+
+Query the OpenAI LLM:
+
+```sh
+TEMP=0.6 python -m app.openai.llm
+```
+
+Query the Meta Llama LLM:
+
+```sh
+TEMP=0.6 python -m app.meta.llm
+```
+> NOTE: the first time the LLama model is run, it will take a while to download.
 
 ### Cell-based Document Splitting
 
@@ -107,14 +141,10 @@ DOCS_LIMIT=5 python -m app.submissions_retriever
 
 ### Retreival Augmented Generation (RAG)
 
-Chat with the LLM:
+Use an LLM for grading:
 
 ```sh
-TEMP=0.6 python -m app.openai_llm
-```
-
-```sh
-DOCS_LIMIT=5 python -m app.submissions_grader
+DOCS_LIMIT=5 python -m app.openai.submissions_grader
 
 # DOCS_LIMIT=5 SIMILARITY_THRESHOLD=0.75 CHUNK_SIZE=1000 CHUNK_OVERLAP=0 python -m app.submissions_grader
 ```

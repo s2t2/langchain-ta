@@ -26,6 +26,8 @@ from app.document_formatting import documents_to_df
 
 load_dotenv()
 
+FILE_ID_SPLIT_INDEX = int(os.getenv("FILE_ID_SPLIT_INDEX", default="1"))
+
 CHUNK_SIZE =  int(os.getenv("CHUNK_SIZE", default="1_000")) # 500
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", default="0")) # 40
 
@@ -34,17 +36,23 @@ SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", default="0.75"))
 FIG_SHOW = bool(os.getenv("FIG_SHOW", default="true") == "true")
 
 
-
-
 class DocumentProcessor:
     """Processes .IPYNB notebook documents."""
 
-    def __init__(self, filepath, chunk_overlap=CHUNK_OVERLAP, chunk_size=CHUNK_SIZE, verbose=True, similarity_threshold=SIMILARITY_THRESHOLD, file_id=None):
-        """Param : filepath to the notebook document"""
+    def __init__(self, filepath, chunk_overlap=CHUNK_OVERLAP, chunk_size=CHUNK_SIZE, verbose=True, similarity_threshold=SIMILARITY_THRESHOLD, file_id=None,
+                 file_id_split_index=FILE_ID_SPLIT_INDEX
+        ):
+        """Param : filepath to the notebook document
+
+            file_id_split_index (int) :
+                0: assumes files are named like "USERNAME_Homework_4_more_stuff.ipynb" (as downloaded from Canvas)
+                1: assumes files are named like "Homework 4_USERNAME_more_stuff.ipynb" (as downloaded from Blacboard)
+        """
 
         self.filepath = filepath
         self.filename = self.filepath.split("/")[-1] # might not work on windows?
-        self.file_id = file_id or self.filename.split("_")[1] # assumes files are named like "Homework 4_USERNAME_more_stuff.ipynb" ... todo: regex instead, to be more precise
+        self.file_id_split_index = file_id_split_index
+        self.file_id = file_id or self.filename.split("_")[self.file_id_split_index]
 
         self.chunk_overlap = int(chunk_overlap)
         self.chunk_size = int(chunk_size)

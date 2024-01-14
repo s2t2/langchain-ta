@@ -58,6 +58,7 @@ OPENAI_API_KEY="sk-..."
 
 SUBMISSIONS_DIRPATH="/Users/USERNAME/Desktop/GRADING HW 4"
 STARTER_FILENAME="Homework_X_STARTER.ipynb"
+FILE_ID_SPLIT_INDEX="0" # 0 for files from Canvas, 1 for files from Blackboard
 ```
 
 

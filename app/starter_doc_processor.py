@@ -32,7 +32,7 @@ if __name__ == "__main__":
     sm = SubmissionsManager()
     print(sm.dirpath)
     print(len(sm.filenames))
-    starter_filepath = sm.find_filepath(substr="STARTER")
+    starter_filepath = sm.starter_filepath or sm.find_filepath(substr="STARTER")
 
     print("---------------")
     print("STARTER DOC...")
